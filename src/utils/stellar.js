@@ -67,6 +67,13 @@ function normaliseOp(op) {
     case 'path_payment_strict_send':
     case 'path_payment_strict_receive':
       return { ...base, from: op.from, to: op.to, asset_sent: formatAsset(op.asset_type, op.asset_code, op.asset_issuer), amount: op.amount, destination_asset: formatAsset(op.destination_asset_type, op.destination_asset_code, op.destination_asset_issuer), destination_amount: op.destination_amount }
+    case 'invoke_host_function':
+  return {
+    ...base,
+    function: op.function?.replace('HostFunctionTypeHostFunctionType', '') || 'InvokeContract',
+    parameters: op.parameters ? `${op.parameters.length} parameter(s)` : 'none',
+    source_account: op.source_account,
+  }
     default:
       return { ...base, ...op }
   }
