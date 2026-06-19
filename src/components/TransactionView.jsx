@@ -78,7 +78,14 @@ export default function TransactionView({ tx }) {
             {tx.fee_charged && (
               <Field label="Fee charged" value={`${tx.fee_charged} stroops (${(tx.fee_charged / 1e7).toFixed(7)} XLM)`} onCopy={handleCopy} copyValue={tx.fee_charged} />
             )}
-            {tx.memo && <Field label={`Memo (${tx.memo_type})`} value={tx.memo} onCopy={handleCopy} />}
+            {tx.memo && (
+              <div>
+                <Field label={`Memo (${tx.memo_type})`} value={tx.memo} onCopy={handleCopy} />
+                {tx.memo_raw && tx.memo_raw !== tx.memo && (
+                  <Field label="Memo (raw)" value={tx.memo_raw} onCopy={handleCopy} copyValue={tx.memo_raw} />
+                )}
+              </div>
+            )}
             {tx.operation_count && <Field label="Operation count" value={String(tx.operation_count)} onCopy={handleCopy} />}
           </div>
         </div>

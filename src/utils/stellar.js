@@ -39,6 +39,27 @@ export async function fetchAccountTransactions(address, limit = 10) {
   return data._embedded.records
 }
 
+function decodeMemo(memoType, memo) {
+  if (!memo) return null
+
+  if (memoType === 'memo_hash' || memoType === 'memo_return') {
+    // Try to decode from hex to UTF-8
+    try {
+      const buffer = Buffer.from(memo, 'hex')
+      const text = buffer.toString('utf8')
+      // Check if it's valid UTF-8 text
+      const reencoded = Buffer.from(text, 'utf8').toString('hex')
+      if (reencoded === memo.toLowerCase()) {
+        return text
+      }
+    } catch {
+      // Fallback to original hex
+    }
+  }
+
+  return memo
+}
+
 function normalise(tx, ops) {
   return {
     hash: tx.hash,
@@ -50,7 +71,8 @@ function normalise(tx, ops) {
     operation_count: tx.operation_count,
     successful: tx.successful,
     memo_type: tx.memo_type,
-    memo: tx.memo || null,
+    memo: decodeMemo(tx.memo_type, tx.memo),
+    memo_raw: tx.memo || null,
     envelope_xdr: tx.envelope_xdr,
     result_xdr: tx.result_xdr,
     operations: ops.map(normaliseOp),
