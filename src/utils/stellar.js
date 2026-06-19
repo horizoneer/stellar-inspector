@@ -74,12 +74,98 @@ function normaliseOp(op) {
     case 'path_payment_strict_receive':
       return { ...base, from: op.from, to: op.to, asset_sent: formatAsset(op.asset_type, op.asset_code, op.asset_issuer), amount: op.amount, destination_asset: formatAsset(op.destination_asset_type, op.destination_asset_code, op.destination_asset_issuer), destination_amount: op.destination_amount }
     case 'invoke_host_function':
-  return {
-    ...base,
-    function: op.function?.replace('HostFunctionTypeHostFunctionType', '') || 'InvokeContract',
-    parameters: op.parameters ? `${op.parameters.length} parameter(s)` : 'none',
-    source_account: op.source_account,
-  }
+      return {
+        ...base,
+        function: op.function?.replace('HostFunctionTypeHostFunctionType', '') || 'InvokeContract',
+        parameters: op.parameters ? `${op.parameters.length} parameter(s)` : 'none',
+        source_account: op.source_account,
+      }
+    case 'set_options':
+      return {
+        ...base,
+        signer: op.signer ? `${op.signer.key?.slice(0, 8)}... (weight: ${op.signer.weight})` : null,
+        master_weight: op.master_weight,
+        low_threshold: op.low_threshold,
+        med_threshold: op.med_threshold,
+        high_threshold: op.high_threshold,
+        home_domain: op.home_domain,
+        inflation_dest: op.inflation_dest,
+        clear_flags: op.clear_flags,
+        set_flags: op.set_flags,
+      }
+    case 'account_merge':
+      return { ...base, account: op.account, into: op.into }
+    case 'manage_data':
+      return { ...base, name: op.name, value: op.value }
+    case 'bump_sequence':
+      return { ...base, bump_to: op.bump_to }
+    case 'create_passive_sell_offer':
+      return {
+        ...base,
+        selling: formatAsset(op.selling_asset_type, op.selling_asset_code, op.selling_asset_issuer),
+        buying: formatAsset(op.buying_asset_type, op.buying_asset_code, op.buying_asset_issuer),
+        amount: op.amount,
+        price: op.price,
+      }
+    case 'liquidity_pool_deposit':
+      return {
+        ...base,
+        pool_id: op.liquidity_pool_id,
+        max_amount_a: op.max_amount_a,
+        max_amount_b: op.max_amount_b,
+        min_price: op.min_price,
+        max_price: op.max_price,
+      }
+    case 'liquidity_pool_withdraw':
+      return {
+        ...base,
+        pool_id: op.liquidity_pool_id,
+        amount: op.amount,
+        min_amount_a: op.min_amount_a,
+        min_amount_b: op.min_amount_b,
+      }
+    case 'create_claimable_balance':
+      return {
+        ...base,
+        asset: formatAsset(op.asset_type, op.asset_code, op.asset_issuer),
+        amount: op.amount,
+        claimants: op.claimants?.length || 0,
+      }
+    case 'claim_claimable_balance':
+      return {
+        ...base,
+        balance_id: op.balance_id,
+        claimant: op.claimant,
+      }
+    case 'clawback':
+      return {
+        ...base,
+        asset: formatAsset(op.asset_type, op.asset_code, op.asset_issuer),
+        from: op.from,
+        amount: op.amount,
+      }
+    case 'clawback_claimable_balance':
+      return {
+        ...base,
+        balance_id: op.balance_id,
+      }
+    case 'set_trust_line_flags':
+      return {
+        ...base,
+        asset: formatAsset(op.asset_type, op.asset_code, op.asset_issuer),
+        trustor: op.trustor,
+        clear_flags: op.clear_flags,
+        set_flags: op.set_flags,
+      }
+    case 'extend_footprint_ttl':
+      return {
+        ...base,
+        extend_to: op.extend_to,
+      }
+    case 'restore_footprint':
+      return {
+        ...base,
+      }
     default:
       return { ...base, ...op }
   }
