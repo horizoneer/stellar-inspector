@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Wallet, Loader2, AlertCircle, Copy, ExternalLink as ExternalLinkIcon, ArrowRight } from 'lucide-react'
+import { Wallet, Loader2, AlertCircle, Copy, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { useNetwork } from '../context/NetworkContext'
-import { fetchAccount } from '../utils/stellar'
+import { fetchAccount, fetchAccountTransactions } from '../utils/stellar'
 import { setHorizonUrl } from '../utils/stellar'
 import CopyButton from '../components/CopyButton'
 import styles from './AccountPage.module.css'
@@ -11,6 +11,7 @@ export default function AccountPage() {
   const { address } = useParams()
   const { config } = useNetwork()
   const [account, setAccount] = useState(null)
+  const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -19,20 +20,24 @@ export default function AccountPage() {
   }, [config.horizonUrl])
 
   useEffect(() => {
-    async function loadAccount() {
+    async function loadData() {
       if (!address) return
       setLoading(true)
       setError(null)
       try {
-        const data = await fetchAccount(address)
-        setAccount(data)
+        const [accountData, txData] = await Promise.all([
+          fetchAccount(address),
+          fetchAccountTransactions(address)
+        ])
+        setAccount(accountData)
+        setTransactions(txData)
       } catch (err) {
         setError(err.message)
       } finally {
         setLoading(false)
       }
     }
-    loadAccount()
+    loadData()
   }, [address])
 
   if (loading) {
@@ -134,12 +139,27 @@ export default function AccountPage() {
 
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Recent Transactions</h2>
-            <div className={styles.recentTx}>
-              <Link to={`/?recent=${address}`} className={styles.viewAllLink}>
-                View recent transactions
-                <ArrowRight size={14} />
-              </Link>
-            </div>
+            {transactions.length === 0 ? (
+              <p className={styles.muted}>No recent transactions found for this account.</p>
+            ) : (
+              <div className={styles.txList}>
+                {transactions.map(tx => (
+                  <Link to={`/tx/${tx.hash}`} key={tx.hash} className={styles.txItem}>
+                    <div className={styles.txHash}>
+                      {tx.hash.slice(0, 16)}…{tx.hash.slice(-8)}
+                    </div>
+                    <div className={styles.txMeta}>
+                      <span className={`${styles.txStatus} ${tx.successful ? styles.txSuccess : styles.txFailed}`}>
+                        {tx.successful ? 'Success' : 'Failed'}
+                      </span>
+                      <span className={styles.txDate}>
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={styles.section}>

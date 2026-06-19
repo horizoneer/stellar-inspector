@@ -153,7 +153,9 @@
   color: var(--color-text-muted);
 }
 
-.recentTx {
+.muted {
+  color: var(--color-text-muted);
+  font-size: 13px;
   padding: 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -161,16 +163,63 @@
   text-align: center;
 }
 
-.viewAllLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--color-accent);
+.txList {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.viewAllLink:hover {
-  color: var(--color-accent-hover);
+.txItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.txItem:last-child {
+  border-bottom: none;
+}
+
+.txItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.txHash {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+}
+
+.txMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.txStatus {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.txSuccess {
+  color: var(--color-success);
+  background: var(--color-success-dim);
+}
+
+.txFailed {
+  color: var(--color-danger);
+  background: var(--color-danger-dim);
+}
+
+.txDate {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .signerList {
