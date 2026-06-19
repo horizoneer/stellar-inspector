@@ -32,6 +32,13 @@ export async function fetchAccount(address) {
   return res.json()
 }
 
+export async function fetchAccountTransactions(address, limit = 10) {
+  const res = await fetch(`${HORIZON_URL}/accounts/${address}/transactions?limit=${limit}&order=desc`)
+  if (!res.ok) throw new Error(`Failed to fetch transactions (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records
+}
+
 function normalise(tx, ops) {
   return {
     hash: tx.hash,
