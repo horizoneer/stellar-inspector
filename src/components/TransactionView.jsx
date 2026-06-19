@@ -5,6 +5,7 @@ import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import Toast from './Toast'
+import OperationFilter from './OperationFilter'
 import { useClipboard } from '../hooks/useClipboard'
 import styles from './TransactionView.module.css'
 
@@ -14,6 +15,7 @@ const TABS = ['Overview', 'Operations', 'Raw data']
 
 export default function TransactionView({ tx }) {
   const [tab, setTab] = useState('Overview')
+  const [operationFilter, setOperationFilter] = useState('all')
   const { copy, copied } = useClipboard()
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
@@ -85,25 +87,34 @@ export default function TransactionView({ tx }) {
           {tx.operations.length === 0 ? (
             <p className={styles.muted}>No operations decoded — try a full transaction hash for operation details.</p>
           ) : (
-            tx.operations.map((op, i) => (
-              <div key={op.id || i} className={styles.opCard}>
-                <div className={styles.opHeader}>
-                  <span className={styles.opIndex}>Op {i + 1}</span>
-                  <span className={styles.opType}>{formatOpType(op.type)}</span>
-                </div>
-                <div className={styles.opFields}>
-                  {Object.entries(op)
-                    .filter(([k]) => !['id', 'type', 'type_i', 'created_at'].includes(k))
-                    .map(([k, v]) => v && (
-                      <div key={k} className={styles.opRow}>
-                        <span className={styles.opKey}>{k.replace(/_/g, ' ')}</span>
-                        <span className={styles.opVal}>{v}</span>
-                        <CopyButton value={String(v)} label={k} />
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ))
+            <>
+              <OperationFilter
+                value={operationFilter}
+                onChange={setOperationFilter}
+                operations={tx.operations}
+              />
+              {tx.operations
+                .filter(op => operationFilter === 'all' || op.type === operationFilter)
+                .map((op, i) => (
+                  <div key={op.id || i} className={styles.opCard}>
+                    <div className={styles.opHeader}>
+                      <span className={styles.opIndex}>Op {i + 1}</span>
+                      <span className={styles.opType}>{formatOpType(op.type)}</span>
+                    </div>
+                    <div className={styles.opFields}>
+                      {Object.entries(op)
+                        .filter(([k]) => !['id', 'type', 'type_i', 'created_at'].includes(k))
+                        .map(([k, v]) => v && (
+                          <div key={k} className={styles.opRow}>
+                            <span className={styles.opKey}>{k.replace(/_/g, ' ')}</span>
+                            <span className={styles.opVal}>{v}</span>
+                            <CopyButton value={String(v)} label={k} />
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+            </>
           )}
         </div>
       )}
