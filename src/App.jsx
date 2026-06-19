@@ -13,6 +13,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<InspectorPage />} />
+            <Route path="tx/:hash" element={<InspectorPage />} />
             <Route path="account/:address" element={<AccountPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

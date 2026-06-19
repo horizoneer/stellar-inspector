@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
@@ -15,6 +16,16 @@ export default function InspectorPage() {
   const [error, setError] = useState(null)
   const { config, network } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
+  const navigate = useNavigate()
+  const { hash: urlHash } = useParams()
+
+  // Handle deep-linked transaction hash from URL
+  useEffect(() => {
+    if (urlHash && !tx && !loading) {
+      setInput(urlHash)
+      handleInspect(urlHash)
+    }
+  }, [urlHash])
 
   useEffect(() => {
     setHorizonUrl(config.horizonUrl)
@@ -26,6 +37,12 @@ export default function InspectorPage() {
     setLoading(true)
     setError(null)
     setTx(null)
+    
+    // Update URL for shareable link (only for valid hashes, not XDR)
+    if (query.length === 64 && !tx?.xdr_only) {
+      navigate(`/tx/${query}`, { replace: true })
+    }
+    
     try {
       const result = await fetchTransaction(query)
       setTx(result)
