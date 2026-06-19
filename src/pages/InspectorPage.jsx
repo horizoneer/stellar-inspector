@@ -3,6 +3,7 @@ import { Search, Loader2, AlertCircle } from 'lucide-react'
 import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import TransactionView from '../components/TransactionView'
+import NetworkStatus from '../components/NetworkStatus'
 import styles from './InspectorPage.module.css'
 
 export default function InspectorPage() {
@@ -62,6 +63,8 @@ export default function InspectorPage() {
           Paste a Stellar transaction hash or XDR string to decode it into plain English.
         </p>
       </div>
+
+      <NetworkStatus />
 
       <div className={styles.searchRow}>
         <div className={styles.inputWrap}>
