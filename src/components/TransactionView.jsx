@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json'
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import { Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import Toast from './Toast'
 import { useClipboard } from '../hooks/useClipboard'
@@ -15,10 +16,21 @@ export default function TransactionView({ tx }) {
   const [tab, setTab] = useState('Overview')
   const { copy, copied } = useClipboard()
   const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('Copied!')
 
   function handleCopy(value, key) {
     copy(value, key)
-    setToastVisible(v => !v)
+    setToastMessage('Copied!')
+    setToastVisible(true)
+    setTimeout(() => setToastVisible(false), 2000)
+  }
+
+  function handleShare() {
+    if (!tx.hash) return
+    const url = `${window.location.origin}/tx/${tx.hash}`
+    navigator.clipboard.writeText(url)
+    setToastMessage('Link copied!')
+    setToastVisible(true)
     setTimeout(() => setToastVisible(false), 2000)
   }
 
@@ -47,6 +59,12 @@ export default function TransactionView({ tx }) {
               </span>
               {tx.ledger && <span className={styles.metaItem}>Ledger #{tx.ledger.toLocaleString()}</span>}
               {tx.created_at && <span className={styles.metaItem}>{new Date(tx.created_at).toUTCString()}</span>}
+              {tx.hash && !tx.xdr_only && (
+                <button className={styles.shareBtn} onClick={handleShare} aria-label="Share transaction">
+                  <Share2 size={14} />
+                  <span>Share</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -132,7 +150,7 @@ export default function TransactionView({ tx }) {
         </div>
       )}
 
-      <Toast message="Copied!" visible={toastVisible} />
+      <Toast message={toastMessage} visible={toastVisible} />
     </div>
   )
 }
