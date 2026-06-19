@@ -37,6 +37,28 @@
   --radius-xl: 16px;
 }
 
+/* Light theme */
+[data-theme="light"] {
+  --color-bg: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f3f5;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-hover: rgba(0, 0, 0, 0.15);
+
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+
+  --color-accent: #6366f1;
+  --color-accent-dim: rgba(99, 102, 241, 0.1);
+  --color-accent-hover: #4f46e5;
+
+  --color-success-dim: rgba(52, 211, 153, 0.15);
+  --color-warning-dim: rgba(251, 191, 36, 0.15);
+  --color-danger-dim: rgba(248, 113, 113, 0.15);
+  --color-info-dim: rgba(96, 165, 250, 0.15);
+}
+
 html, body {
   height: 100%;
   background: var(--color-bg);
