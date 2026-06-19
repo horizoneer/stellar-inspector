@@ -6,6 +6,7 @@ import { Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import Toast from './Toast'
 import OperationFilter from './OperationFilter'
+import ExportButton from './ExportButton'
 import { useClipboard } from '../hooks/useClipboard'
 import styles from './TransactionView.module.css'
 
@@ -67,6 +68,7 @@ export default function TransactionView({ tx }) {
                   <span>Share</span>
                 </button>
               )}
+              <ExportButton tx={tx} />
             </div>
           )}
 
