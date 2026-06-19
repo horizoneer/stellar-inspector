@@ -1,6 +1,7 @@
 import React from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { Telescope, Github, ExternalLink } from 'lucide-react'
+import NetworkToggle from './NetworkToggle'
 import styles from './Layout.module.css'
 
 export default function Layout() {
@@ -20,6 +21,7 @@ export default function Layout() {
           </nav>
 
           <div className={styles.headerRight}>
+            <NetworkToggle />
             <a
               href="https://github.com/horizoneer/stellar-inspector"
               target="_blank"
