@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
 import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
+import { useTransactionHistory } from '../hooks/useTransactionHistory'
 import TransactionView from '../components/TransactionView'
 import NetworkStatus from '../components/NetworkStatus'
+import TransactionHistory from '../components/TransactionHistory'
 import styles from './InspectorPage.module.css'
 
 export default function InspectorPage() {
@@ -12,6 +14,7 @@ export default function InspectorPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { config, network } = useNetwork()
+  const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
 
   useEffect(() => {
     setHorizonUrl(config.horizonUrl)
@@ -26,11 +29,19 @@ export default function InspectorPage() {
     try {
       const result = await fetchTransaction(query)
       setTx(result)
+      if (!result.xdr_only) {
+        addToHistory(result)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleHistorySelect(hash) {
+    setInput(hash)
+    handleInspect(hash)
   }
 
   function handleKeyDown(e) {
@@ -42,12 +53,13 @@ export default function InspectorPage() {
   setError(null)
   setTx(null)
   try {
-    const res = await fetch('https://horizon-testnet.stellar.org/transactions?limit=1&order=desc')
+    const res = await fetch(`${config.horizonUrl}/transactions?limit=1&order=desc`)
     const data = await res.json()
     const hash = data._embedded.records[0].hash
     setInput(hash)
     const result = await fetchTransaction(hash)
     setTx(result)
+    addToHistory(result)
   } catch (err) {
     setError('Could not load example transaction.')
   } finally {
@@ -65,6 +77,13 @@ export default function InspectorPage() {
       </div>
 
       <NetworkStatus />
+
+      <TransactionHistory
+        history={history}
+        onSelect={handleHistorySelect}
+        onRemove={removeFromHistory}
+        onClear={clearHistory}
+      />
 
       <div className={styles.searchRow}>
         <div className={styles.inputWrap}>
