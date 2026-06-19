@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
-import { fetchTransaction } from '../utils/stellar'
+import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
+import { useNetwork } from '../context/NetworkContext'
 import TransactionView from '../components/TransactionView'
 import styles from './InspectorPage.module.css'
 
@@ -9,6 +10,11 @@ export default function InspectorPage() {
   const [tx, setTx] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { config, network } = useNetwork()
+
+  useEffect(() => {
+    setHorizonUrl(config.horizonUrl)
+  }, [config.horizonUrl])
 
   async function handleInspect(value) {
     const query = (value || input).trim()

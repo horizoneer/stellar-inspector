@@ -1,4 +1,8 @@
-const HORIZON_URL = 'https://horizon-testnet.stellar.org'
+let HORIZON_URL = 'https://horizon-testnet.stellar.org'
+
+export function setHorizonUrl(url) {
+  HORIZON_URL = url
+}
 
 export async function fetchTransaction(hashOrXdr) {
   const isXdr = hashOrXdr.length > 64
