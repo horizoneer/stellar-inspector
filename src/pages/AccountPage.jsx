@@ -9,6 +9,22 @@ import Toast from '../components/Toast'
 import { useClipboard } from '../hooks/useClipboard'
 import styles from './AccountPage.module.css'
 
+function formatRelativeTime(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now - date;
+  const diffInSec = Math.floor(diffInMs / 1000);
+  const diffInMin = Math.floor(diffInSec / 60);
+  const diffInHr = Math.floor(diffInMin / 60);
+  const diffInDay = Math.floor(diffInHr / 24);
+
+  if (diffInSec < 60) return 'Just now';
+  if (diffInMin < 60) return `${diffInMin} minute${diffInMin !== 1 ? 's' : ''} ago`;
+  if (diffInHr < 24) return `${diffInHr} hour${diffInHr !== 1 ? 's' : ''} ago`;
+  if (diffInDay < 7) return `${diffInDay} day${diffInDay !== 1 ? 's' : ''} ago`;
+  return new Date(date).toLocaleDateString();
+}
+
 export default function AccountPage() {
   const { address } = useParams()
   const { config, network } = useNetwork()
@@ -176,18 +192,18 @@ export default function AccountPage() {
               <div className={styles.txList}>
                 {transactions.map(tx => (
                   <Link to={`/tx/${tx.hash}`} key={tx.hash} className={styles.txItem}>
-                    <div className={styles.txHash}>
-                      {tx.hash.slice(0, 16)}…{tx.hash.slice(-8)}
-                    </div>
-                    <div className={styles.txMeta}>
-                      <span className={`${styles.txStatus} ${tx.successful ? styles.txSuccess : styles.txFailed}`}>
-                        {tx.successful ? 'Success' : 'Failed'}
-                      </span>
-                      <span className={styles.txDate}>
-                        {new Date(tx.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Link>
+                <div className={styles.txHash}>
+                  {tx.hash.slice(0, 16)}…{tx.hash.slice(-8)}
+                </div>
+                <div className={styles.txMeta}>
+                  <span className={`${styles.txStatus} ${tx.successful ? styles.txSuccess : styles.txFailed}`}>
+                    {tx.successful ? 'Success' : 'Failed'}
+                  </span>
+                  <span className={styles.txDate}>
+                    {formatRelativeTime(tx.created_at)}
+                  </span>
+                </div>
+              </Link>
                 ))}
               </div>
             )}
