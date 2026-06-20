@@ -198,6 +198,7 @@ export default function AccountPage() {
               {account.signers?.map((signer, i) => (
                 <div key={i} className={styles.signerItem}>
                   <span className={styles.signerKey}>{signer.key?.slice(0, 16)}…{signer.key?.slice(-8)}</span>
+                  <CopyButton value={signer.key} label="Signer key" />
                   <div className={styles.signerWeightContainer}>
                     <span className={styles.signerWeight}>Weight: {signer.weight}</span>
                     <div className={styles.signerProgress}>
