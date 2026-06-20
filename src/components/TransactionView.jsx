@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/hljs/json'
 import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import { Share2 } from 'lucide-react'
+import { Share2, FileText, Hash, Lock, RefreshCw } from 'lucide-react'
 import CopyButton from './CopyButton'
 import Toast from './Toast'
 import OperationFilter from './OperationFilter'
@@ -146,7 +146,21 @@ export default function TransactionView({ tx }) {
             )}
             {tx.memo && (
               <div>
-                <Field label={`Memo (${tx.memo_type})`} value={tx.memo} onCopy={handleCopy} />
+                <div className={styles.field}>
+                  <div className={styles.fieldLabel}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      {tx.memo_type === 'text' && <FileText size={14} />}
+                      {tx.memo_type === 'id' && <Hash size={14} />}
+                      {tx.memo_type === 'hash' && <Lock size={14} />}
+                      {tx.memo_type === 'return' && <RefreshCw size={14} />}
+                      Memo ({tx.memo_type})
+                    </span>
+                  </div>
+                  <div className={styles.fieldValue}>
+                    <span className={styles.fieldText}>{tx.memo}</span>
+                    <CopyButton value={tx.memo} label="Memo" />
+                  </div>
+                </div>
                 {tx.memo_raw && tx.memo_raw !== tx.memo && (
                   <Field label="Memo (raw)" value={tx.memo_raw} onCopy={handleCopy} copyValue={tx.memo_raw} />
                 )}
