@@ -61,6 +61,29 @@
   box-shadow: 0 0 0 3px var(--color-accent-dim);
 }
 
+.clearBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+
+.clearBtn:hover {
+  color: var(--color-text-primary);
+  background: rgba(255,255,255,0.05);
+}
+
 .btnPrimary {
   height: 40px;
   padding: 0 20px;

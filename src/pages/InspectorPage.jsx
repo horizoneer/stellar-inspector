@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Loader2, AlertCircle } from 'lucide-react'
+import { Search, Loader2, AlertCircle, X } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
@@ -117,6 +117,19 @@ export default function InspectorPage() {
             spellCheck={false}
             autoComplete="off"
           />
+          {input && (
+            <button 
+              className={styles.clearBtn} 
+              onClick={(e) => {
+                e.preventDefault()
+                setInput('')
+                setShowDropdown(true)
+              }}
+              aria-label="Clear input"
+            >
+              <X size={14} />
+            </button>
+          )}
           {showDropdown && history.length > 0 && (
             <div className={styles.dropdown}>
               {history.map(item => (
