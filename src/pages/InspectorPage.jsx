@@ -14,6 +14,7 @@ export default function InspectorPage() {
   const [tx, setTx] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showDropdown, setShowDropdown] = useState(false)
   const { config, network } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
   const navigate = useNavigate()
@@ -110,10 +111,34 @@ export default function InspectorPage() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setShowDropdown(true)}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             placeholder="Transaction hash or XDR…"
             spellCheck={false}
             autoComplete="off"
           />
+          {showDropdown && history.length > 0 && (
+            <div className={styles.dropdown}>
+              {history.map(item => (
+                <button
+                  key={item.hash}
+                  className={styles.dropdownItem}
+                  onClick={() => {
+                    setInput(item.hash)
+                    handleInspect(item.hash)
+                    setShowDropdown(false)
+                  }}
+                >
+                  <span className={styles.dropdownHash}>
+                    {item.hash.slice(0, 10)}…{item.hash.slice(-8)}
+                  </span>
+                  <span className={styles.dropdownMeta}>
+                    {item.operationCount} op{item.operationCount !== 1 ? 's' : ''}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <button className={styles.btnPrimary} onClick={() => handleInspect()} disabled={loading}>
           {loading ? <Loader2 size={15} className={styles.spin} /> : 'Inspect'}
