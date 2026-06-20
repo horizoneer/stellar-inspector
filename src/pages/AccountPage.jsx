@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Wallet, Loader2, AlertCircle, Copy, ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { Wallet, Loader2, AlertCircle, Copy, ExternalLink as ExternalLinkIcon, Share2 } from 'lucide-react'
 import { useNetwork } from '../context/NetworkContext'
 import { fetchAccount, fetchAccountTransactions } from '../utils/stellar'
 import { setHorizonUrl } from '../utils/stellar'
 import CopyButton from '../components/CopyButton'
+import Toast from '../components/Toast'
+import { useClipboard } from '../hooks/useClipboard'
 import styles from './AccountPage.module.css'
 
 export default function AccountPage() {
   const { address } = useParams()
-  const { config } = useNetwork()
+  const { config, network } = useNetwork()
   const [account, setAccount] = useState(null)
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [toastVisible, setToastVisible] = useState(false)
+  const [toastMessage, setToastMessage] = useState('Copied!')
+  const { copy, copied } = useClipboard()
 
   useEffect(() => {
     setHorizonUrl(config.horizonUrl)
@@ -77,6 +82,19 @@ export default function AccountPage() {
       <div className={styles.addressRow}>
         <span className={styles.address}>{address}</span>
         <CopyButton value={address} label="Account address" />
+        <button 
+          className={styles.shareBtn} 
+          onClick={() => {
+            const shareUrl = `${window.location.origin}/account/${address}`
+            copy(shareUrl, 'account-share')
+            setToastMessage('Link copied!')
+            setToastVisible(true)
+            setTimeout(() => setToastVisible(false), 2000)
+          }}
+          aria-label="Share account"
+        >
+          <Share2 size={14} />
+        </button>
         <a
           href={`${config.horizonUrl}/accounts/${address}`}
           target="_blank"
@@ -237,6 +255,7 @@ export default function AccountPage() {
           </div>
         </>
       )}
+      <Toast message={toastMessage} visible={toastVisible} />
     </div>
   )
 }
