@@ -17,6 +17,7 @@ const TABS = ['Overview', 'Operations', 'Raw data']
 export default function TransactionView({ tx }) {
   const [tab, setTab] = useState('Overview')
   const [operationFilter, setOperationFilter] = useState('all')
+  const [displayUnit, setDisplayUnit] = useState('xlm') // 'xlm' or 'stroops'
   const { copy, copied } = useClipboard()
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
@@ -76,7 +77,28 @@ export default function TransactionView({ tx }) {
             {tx.hash && <Field label="Transaction hash" value={tx.hash} onCopy={handleCopy} />}
             {tx.source_account && <Field label="Source account" value={tx.source_account} onCopy={handleCopy} />}
             {tx.fee_charged && (
-              <Field label="Fee charged" value={`${tx.fee_charged} stroops (${(tx.fee_charged / 1e7).toFixed(7)} XLM)`} onCopy={handleCopy} copyValue={tx.fee_charged} />
+              <div className={styles.feeField}>
+                <div style={{ display: 'flex', flex: 1 }}>
+                  <div className={styles.fieldLabel}>Fee charged</div>
+                  <div className={styles.fieldValue}>
+                    <span className={styles.fieldText}>
+                      {displayUnit === 'xlm' 
+                        ? `${(tx.fee_charged / 1e7).toFixed(7)} XLM` 
+                        : `${tx.fee_charged} stroops`}
+                    </span>
+                    <CopyButton 
+                      value={displayUnit === 'xlm' ? (tx.fee_charged / 1e7).toFixed(7) : tx.fee_charged} 
+                      label="Fee" 
+                    />
+                  </div>
+                </div>
+                <button 
+                  className={styles.unitToggle}
+                  onClick={() => setDisplayUnit(displayUnit === 'xlm' ? 'stroops' : 'xlm')}
+                >
+                  {displayUnit === 'xlm' ? 'Show in stroops' : 'Show in XLM'}
+                </button>
+              </div>
             )}
             {tx.memo && (
               <div>
