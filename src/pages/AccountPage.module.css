@@ -46,6 +46,25 @@
   transition: color 0.1s, background 0.1s;
 }
 
+.shareBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+
+.shareBtn:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
 .externalLink:hover {
   color: var(--color-text-primary);
   background: rgba(255, 255, 255, 0.04);
