@@ -176,15 +176,55 @@ export default function AccountPage() {
           </div>
 
           <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Thresholds</h2>
+            <div className={styles.thresholdsList}>
+              <div className={styles.thresholdItem}>
+                <span className={styles.thresholdLabel}>Low</span>
+                <span className={styles.thresholdValue}>{account.thresholds?.low_threshold || 0}</span>
+              </div>
+              <div className={styles.thresholdItem}>
+                <span className={styles.thresholdLabel}>Medium</span>
+                <span className={styles.thresholdValue}>{account.thresholds?.med_threshold || 0}</span>
+              </div>
+              <div className={styles.thresholdItem}>
+                <span className={styles.thresholdLabel}>High</span>
+                <span className={styles.thresholdValue}>{account.thresholds?.high_threshold || 0}</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Signers</h2>
             <div className={styles.signerList}>
               {account.signers?.map((signer, i) => (
                 <div key={i} className={styles.signerItem}>
                   <span className={styles.signerKey}>{signer.key?.slice(0, 16)}…{signer.key?.slice(-8)}</span>
-                  <span className={styles.signerWeight}>Weight: {signer.weight}</span>
+                  <div className={styles.signerWeightContainer}>
+                    <span className={styles.signerWeight}>Weight: {signer.weight}</span>
+                    <div className={styles.signerProgress}>
+                      <div 
+                        className={styles.signerProgressFill} 
+                        style={{ 
+                          width: `${Math.min(100, (signer.weight / (account.thresholds?.high_threshold || 1)) * 100)}%` 
+                        }} 
+                      />
+                    </div>
+                  </div>
                   {signer.key === account.account_id && (
                     <span className={styles.signerBadge}>Primary</span>
                   )}
+                  <a
+                    href={`https://stellar.expert/explorer/${network}/account/${signer.key}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.externalLink}
+                    aria-label="View signer on Stellar Expert"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      <polyline points="15 3 21 3 21 9"></polyline>
+                      <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                  </a>
                 </div>
               ))}
             </div>
