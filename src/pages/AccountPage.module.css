@@ -262,6 +262,55 @@
   border-radius: 999px;
 }
 
+.thresholdsList {
+  display: flex;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+}
+
+.thresholdItem {
+  flex: 1;
+  text-align: center;
+}
+
+.thresholdLabel {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.thresholdValue {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.signerWeightContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.signerProgress {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.signerProgressFill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
 .rawData {
   margin-top: 2rem;
 }
