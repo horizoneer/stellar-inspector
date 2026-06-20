@@ -249,3 +249,32 @@
   color: var(--color-text-muted);
   font-size: 13px;
 }
+
+.feeField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.feeField:last-child {
+  border-bottom: none;
+}
+
+.unitToggle {
+  font-size: 11px;
+  color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-accent-dim);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+
+.unitToggle:hover {
+  background: var(--color-accent-dim);
+}
