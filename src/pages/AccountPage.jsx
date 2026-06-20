@@ -40,18 +40,22 @@ export default function AccountPage() {
     setHorizonUrl(config.horizonUrl)
   }, [config.horizonUrl])
 
+  const [nextCursor, setNextCursor] = useState(null)
+  const [loadingMore, setLoadingMore] = useState(false)
+
   useEffect(() => {
     async function loadData() {
       if (!address) return
       setLoading(true)
       setError(null)
       try {
-        const [accountData, txData] = await Promise.all([
+        const [accountData, txResult] = await Promise.all([
           fetchAccount(address),
           fetchAccountTransactions(address)
         ])
         setAccount(accountData)
-        setTransactions(txData)
+        setTransactions(txResult.records)
+        setNextCursor(txResult.nextCursor)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -60,6 +64,20 @@ export default function AccountPage() {
     }
     loadData()
   }, [address])
+
+  async function loadMore() {
+    if (!nextCursor || loadingMore) return
+    setLoadingMore(true)
+    try {
+      const txResult = await fetchAccountTransactions(address, 10, nextCursor)
+      setTransactions(prev => [...prev, ...txResult.records])
+      setNextCursor(txResult.nextCursor)
+    } catch (err) {
+      console.error('Failed to load more transactions:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -189,23 +207,42 @@ export default function AccountPage() {
             {transactions.length === 0 ? (
               <p className={styles.muted}>No recent transactions found for this account.</p>
             ) : (
-              <div className={styles.txList}>
-                {transactions.map(tx => (
-                  <Link to={`/tx/${tx.hash}`} key={tx.hash} className={styles.txItem}>
-                <div className={styles.txHash}>
-                  {tx.hash.slice(0, 16)}…{tx.hash.slice(-8)}
+              <>
+                <div className={styles.txList}>
+                  {transactions.map(tx => (
+                    <Link to={`/tx/${tx.hash}`} key={tx.hash} className={styles.txItem}>
+                      <div className={styles.txHash}>
+                        {tx.hash.slice(0, 16)}…{tx.hash.slice(-8)}
+                      </div>
+                      <div className={styles.txMeta}>
+                        <span className={`${styles.txStatus} ${tx.successful ? styles.txSuccess : styles.txFailed}`}>
+                          {tx.successful ? 'Success' : 'Failed'}
+                        </span>
+                        <span className={styles.txDate}>
+                          {formatRelativeTime(tx.created_at)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <div className={styles.txMeta}>
-                  <span className={`${styles.txStatus} ${tx.successful ? styles.txSuccess : styles.txFailed}`}>
-                    {tx.successful ? 'Success' : 'Failed'}
-                  </span>
-                  <span className={styles.txDate}>
-                    {formatRelativeTime(tx.created_at)}
-                  </span>
-                </div>
-              </Link>
-                ))}
-              </div>
+                {nextCursor && (
+                  <div className={styles.loadMoreContainer}>
+                    <button 
+                      className={styles.loadMoreBtn} 
+                      onClick={loadMore} 
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? (
+                        <>
+                          <Loader2 size={14} className={styles.spin} /> Loading...
+                        </>
+                      ) : (
+                        'Load More'
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

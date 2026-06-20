@@ -32,11 +32,18 @@ export async function fetchAccount(address) {
   return res.json()
 }
 
-export async function fetchAccountTransactions(address, limit = 10) {
-  const res = await fetch(`${HORIZON_URL}/accounts/${address}/transactions?limit=${limit}&order=desc`)
+export async function fetchAccountTransactions(address, limit = 10, cursor = null) {
+  let url = `${HORIZON_URL}/accounts/${address}/transactions?limit=${limit}&order=desc`
+  if (cursor) {
+    url += `&cursor=${cursor}`
+  }
+  const res = await fetch(url)
   if (!res.ok) throw new Error(`Failed to fetch transactions (${res.status})`)
   const data = await res.json()
-  return data._embedded.records
+  return {
+    records: data._embedded.records,
+    nextCursor: data._links?.next?.href ? new URL(data._links.next.href).searchParams.get('cursor') : null
+  }
 }
 
 function decodeMemo(memoType, memo) {
