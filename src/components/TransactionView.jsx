@@ -8,6 +8,7 @@ import Toast from './Toast'
 import OperationFilter from './OperationFilter'
 import ExportButton from './ExportButton'
 import { useClipboard } from '../hooks/useClipboard'
+import { useNetwork } from '../context/NetworkContext'
 import styles from './TransactionView.module.css'
 
 SyntaxHighlighter.registerLanguage('json', json)
@@ -18,6 +19,7 @@ export default function TransactionView({ tx }) {
   const [tab, setTab] = useState('Overview')
   const [operationFilter, setOperationFilter] = useState('all')
   const [displayUnit, setDisplayUnit] = useState('xlm') // 'xlm' or 'stroops'
+  const { network } = useNetwork()
   const { copy, copied } = useClipboard()
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
@@ -74,8 +76,50 @@ export default function TransactionView({ tx }) {
           )}
 
           <div className={styles.fields}>
-            {tx.hash && <Field label="Transaction hash" value={tx.hash} onCopy={handleCopy} />}
-            {tx.source_account && <Field label="Source account" value={tx.source_account} onCopy={handleCopy} />}
+            {tx.hash && (
+                <div className={styles.field}>
+                  <span className={styles.fieldLabel}>Transaction hash</span>
+                  <div className={styles.fieldValue}>
+                    <span className={styles.fieldText}>{tx.hash}</span>
+                    <CopyButton value={tx.hash} label="Transaction hash" />
+                    <a 
+                      href={`https://stellar.expert/explorer/${network}/tx/${tx.hash}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.externalLinkIcon}
+                      aria-label="View on Stellar Expert"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              )}
+              {tx.source_account && (
+                <div className={styles.field}>
+                  <span className={styles.fieldLabel}>Source account</span>
+                  <div className={styles.fieldValue}>
+                    <span className={styles.fieldText}>{tx.source_account}</span>
+                    <CopyButton value={tx.source_account} label="Source account" />
+                    <a 
+                      href={`https://stellar.expert/explorer/${network}/account/${tx.source_account}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.externalLinkIcon}
+                      aria-label="View on Stellar Expert"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              )}
             {tx.fee_charged && (
               <div className={styles.feeField}>
                 <div style={{ display: 'flex', flex: 1 }}>
