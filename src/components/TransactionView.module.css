@@ -294,3 +294,7 @@
   color: var(--color-accent);
   background: rgba(255,255,255,0.04);
 }
+
+.opRowAsset {
+  background: rgba(255,255,255,0.03);
+}
