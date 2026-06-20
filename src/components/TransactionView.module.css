@@ -278,3 +278,19 @@
 .unitToggle:hover {
   background: var(--color-accent-dim);
 }
+
+.externalLinkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-muted);
+  transition: color 0.15s;
+  border-radius: var(--radius-sm);
+}
+
+.externalLinkIcon:hover {
+  color: var(--color-accent);
+  background: rgba(255,255,255,0.04);
+}
