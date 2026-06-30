@@ -14,7 +14,11 @@ Built by [Horizoneer](https://github.com/horizoneer).
 - Shows operation-level details (payments, contract calls, trust lines, and more)
 - Syntax-highlighted raw JSON for when you need to go deeper
 - Copy to clipboard on every field — hashes, accounts, XDR strings
-- Supports both Mainnet and Testnet (toggle coming soon)
+- Supports both Mainnet and Testnet (switchable via toggle)
+- Account detail page with balances, trustlines, and recent transactions
+- Full XDR decoder mode
+- Shareable transaction URLs via deep linking
+- Dark/light mode toggle with system preference detection
 
 ---
 
@@ -43,8 +47,11 @@ npm run build
 
 - React 18 + Vite
 - react-syntax-highlighter (Prism) for raw JSON view
-- Stellar Horizon REST API — no SDK dependency at runtime
+- Stellar Horizon REST API
+- stellar-sdk for XDR parsing
 - CSS Modules for styling
+- lucide-react for icons
+- react-router-dom for routing
 
 ---
 
@@ -52,10 +59,11 @@ npm run build
 
 ```
 src/
-  components/     # Reusable UI — CopyButton, Toast, Layout, TransactionView
-  hooks/          # useClipboard
-  pages/          # InspectorPage, AccountPage
-  utils/          # stellar.js — all Horizon API calls live here
+  components/     # Reusable UI components
+  context/        # React context providers (NetworkContext, ThemeContext)
+  hooks/          # Custom React hooks (useClipboard, useTransactionHistory)
+  pages/          # Page components (InspectorPage, AccountPage, NotFoundPage)
+  utils/          # Utilities (stellar.js — all Horizon API calls and XDR parsing)
 ```
 
 ---
@@ -64,12 +72,10 @@ src/
 
 These are things we want to build next. If any of these interest you, open an issue and let's talk.
 
-- [ ] Mainnet / Testnet toggle
-- [ ] Account detail page — balances, recent transactions, trustlines
-- [ ] XDR decoder — paste raw XDR and get a structured breakdown
-- [ ] Operation type coverage — currently handles the most common types, more to add
-- [ ] Share a transaction via URL — `/tx/:hash` deep linking
-- [ ] Dark/light mode toggle
+- [ ] Add more operation type support
+- [ ] Improve test coverage
+- [ ] Add more export formats
+- [ ] Add a demo deployment
 
 ---
 
