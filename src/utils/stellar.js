@@ -46,16 +46,71 @@ export async function fetchAccountTransactions(address, limit = 10, cursor = nul
   }
 }
 
+export async function fetchFeeStats() {
+  const res = await fetch(`${HORIZON_URL}/fee_stats`)
+  if (!res.ok) throw new Error(`Failed to fetch fee stats (${res.status})`)
+  return res.json()
+}
+
+export async function searchTransactions({ sourceAccount, memoText, startDate, endDate, limit = 20 }) {
+  let url = `${HORIZON_URL}/transactions?order=desc&limit=${limit}`
+  
+  if (sourceAccount) {
+    url += `&source_account=${sourceAccount}`
+  }
+
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to search transactions (${res.status})`)
+  const data = await res.json()
+  
+  let transactions = data._embedded.records
+
+  // Filter by memo text if provided
+  if (memoText) {
+    transactions = transactions.filter(tx => 
+      tx.memo && tx.memo.toLowerCase().includes(memoText.toLowerCase())
+    )
+  }
+
+  // Filter by date range if provided
+  if (startDate || endDate) {
+    const start = startDate ? new Date(startDate) : null
+    const end = endDate ? new Date(endDate) : null
+    
+    transactions = transactions.filter(tx => {
+      const txDate = new Date(tx.created_at)
+      if (start && txDate < start) return false
+      if (end && txDate > end) return false
+      return true
+    })
+  }
+
+  // Fetch operations for each transaction
+  const transactionsWithOps = await Promise.all(
+    transactions.map(async (tx) => {
+      try {
+        const opsRes = await fetch(`${HORIZON_URL}/transactions/${tx.hash}/operations`)
+        const opsData = opsRes.ok ? await opsRes.json() : { _embedded: { records: [] } }
+        return normalise(tx, opsData._embedded.records)
+      } catch {
+        return normalise(tx, [])
+      }
+    })
+  )
+
+  return transactionsWithOps
+}
+
 function decodeMemo(memoType, memo) {
   if (!memo) return null
 
   if (memoType === 'memo_hash' || memoType === 'memo_return') {
     // Try to decode from hex to UTF-8
     try {
-      const buffer = Buffer.from(memo, 'hex')
-      const text = buffer.toString('utf8')
+      const buffer = new Uint8Array(memo.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
+      const text = new TextDecoder('utf-8').decode(buffer)
       // Check if it's valid UTF-8 text
-      const reencoded = Buffer.from(text, 'utf8').toString('hex')
+      const reencoded = Array.from(new TextEncoder().encode(text)).map(b => b.toString(16).padStart(2, '0')).join('')
       if (reencoded === memo.toLowerCase()) {
         return text
       }

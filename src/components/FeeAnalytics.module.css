@@ -1,0 +1,90 @@
+.wrap {
+  margin-top: 1.5rem;
+  padding: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.value {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.chartRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chartLabel {
+  width: 32px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.chartBar {
+  flex: 1;
+  height: 12px;
+  background: linear-gradient(90deg, var(--color-success), var(--color-warning));
+  border-radius: 6px;
+  min-width: 2px;
+}
+
+.chartValue {
+  width: 80px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+.loading {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: 12px;
+  color: var(--color-danger);
+}

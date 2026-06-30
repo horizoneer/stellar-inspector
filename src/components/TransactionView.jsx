@@ -7,6 +7,7 @@ import CopyButton from './CopyButton'
 import Toast from './Toast'
 import OperationFilter from './OperationFilter'
 import ExportButton from './ExportButton'
+import FeeAnalytics from './FeeAnalytics'
 import { useClipboard } from '../hooks/useClipboard'
 import { useNetwork } from '../context/NetworkContext'
 import styles from './TransactionView.module.css'
@@ -168,6 +169,7 @@ export default function TransactionView({ tx }) {
             )}
             {tx.operation_count && <Field label="Operation count" value={String(tx.operation_count)} onCopy={handleCopy} />}
           </div>
+          <FeeAnalytics feeCharged={tx.fee_charged} maxFee={tx.max_fee} />
         </div>
       )}
 
