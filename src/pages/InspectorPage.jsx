@@ -1,24 +1,48 @@
-import React, { useState, useEffect } from 'react'
-import { Search, Loader2, AlertCircle, X } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Search, Loader2, AlertCircle, X, GitCompare } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
+import { useKeyboard } from '../hooks/useKeyboard'
 import TransactionView from '../components/TransactionView'
 import NetworkStatus from '../components/NetworkStatus'
 import TransactionHistory from '../components/TransactionHistory'
+import TransactionDiff from '../components/TransactionDiff'
+import TransactionSearch from '../components/TransactionSearch'
 import styles from './InspectorPage.module.css'
 
 export default function InspectorPage() {
   const [input, setInput] = useState('')
   const [tx, setTx] = useState(null)
+  const [prevTx, setPrevTx] = useState(null)
+  const [showDiff, setShowDiff] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
-  const { config, network } = useNetwork()
+  const { config, network, setNetwork } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
   const navigate = useNavigate()
   const { hash: urlHash } = useParams()
+  const inputRef = useRef(null)
+
+  useKeyboard({
+    '/': () => {
+      inputRef.current?.focus()
+    },
+    escape: () => {
+      setInput('')
+      inputRef.current?.blur()
+    },
+    'ctrl+c': () => {
+      if (tx?.hash) {
+        navigator.clipboard.writeText(tx.hash)
+      }
+    },
+    'n/t': () => {
+      setNetwork(network === 'mainnet' ? 'testnet' : 'mainnet')
+    }
+  })
 
   // Handle deep-linked transaction hash from URL
   useEffect(() => {
@@ -37,6 +61,9 @@ export default function InspectorPage() {
     if (!query) return
     setLoading(true)
     setError(null)
+    if (tx && tx.hash) {
+      setPrevTx(tx)
+    }
     setTx(null)
     
     // Update URL for shareable link (only for valid hashes, not XDR)
@@ -96,6 +123,8 @@ export default function InspectorPage() {
 
       <NetworkStatus />
 
+      <TransactionSearch onSelectTransaction={(hash) => handleInspect(hash)} />
+
       <TransactionHistory
         history={history}
         onSelect={handleHistorySelect}
@@ -107,6 +136,7 @@ export default function InspectorPage() {
         <div className={styles.inputWrap}>
           <Search size={15} strokeWidth={1.5} className={styles.searchIcon} />
           <input
+            ref={inputRef}
             className={styles.input}
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -176,6 +206,18 @@ export default function InspectorPage() {
       )}
 
       {tx && <TransactionView tx={tx} />}
+      {tx && prevTx && (
+        <>
+          <button 
+            className={styles.diffBtn}
+            onClick={() => setShowDiff(!showDiff)}
+          >
+            <GitCompare size={14} />
+            {showDiff ? 'Hide Diff' : 'Show Diff with Previous'}
+          </button>
+          {showDiff && <TransactionDiff tx1={prevTx} tx2={tx} onClose={() => setShowDiff(false)} />}
+        </>
+      )}
 
       {!tx && !loading && !error && (
         <div className={styles.empty}>
