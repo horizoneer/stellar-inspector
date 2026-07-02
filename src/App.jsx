@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import Layout from './components/Layout'
 import InspectorPage from './pages/InspectorPage'
 import AccountPage from './pages/AccountPage'
+import LedgerPage from './pages/LedgerPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
               <Route index element={<InspectorPage />} />
               <Route path="tx/:hash" element={<InspectorPage />} />
               <Route path="account/:address" element={<AccountPage />} />
+              <Route path="ledger" element={<LedgerPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

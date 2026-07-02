@@ -52,6 +52,41 @@ export async function fetchFeeStats() {
   return res.json()
 }
 
+export async function fetchLatestLedger() {
+  const res = await fetch(`${HORIZON_URL}/ledgers?order=desc&limit=1`)
+  if (!res.ok) throw new Error(`Failed to fetch latest ledger (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records[0]
+}
+
+export async function simulateTransaction(xdr) {
+  const res = await fetch(`${HORIZON_URL}/transactions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      tx: xdr,
+      simulate: 'true'
+    })
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || `Simulation failed (${res.status})`)
+  }
+
+  return res.json()
+}
+
+export async function fetchAssets(assetCode, assetIssuer) {
+  let url = `${HORIZON_URL}/assets?asset_code=${encodeURIComponent(assetCode)}&asset_issuer=${encodeURIComponent(assetIssuer)}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch assets (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records[0]
+}
+
 export async function searchTransactions({ sourceAccount, memoText, startDate, endDate, limit = 20 }) {
   let url = `${HORIZON_URL}/transactions?order=desc&limit=${limit}`
   
@@ -263,8 +298,24 @@ function normaliseOp(op) {
 }
 
 function formatAsset(type, code, issuer) {
-  if (type === 'native') return 'XLM (native)'
-  return `${code}${issuer ? ` · ${issuer.slice(0, 6)}…${issuer.slice(-4)}` : ''}`
+  if (type === 'native') {
+    return {
+      display: 'XLM (native)',
+      isNative: true,
+      code: 'XLM',
+      issuer: null
+    }
+  }
+  return {
+    display: `${code}${issuer ? ` · ${issuer.slice(0, 6)}…${issuer.slice(-4)}` : ''}`,
+    isNative: false,
+    code,
+    issuer
+  }
+}
+
+function formatAssetForDisplay(asset) {
+  return asset?.display || asset || 'XLM (native)'
 }
 
 function decodeXdr(xdr) {
