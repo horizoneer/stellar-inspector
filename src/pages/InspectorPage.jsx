@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, Loader2, AlertCircle, X, GitCompare } from 'lucide-react'
+import { Search, Loader2, AlertCircle, X, GitCompare, Eye } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchTransaction, setHorizonUrl } from '../utils/stellar'
+import { fetchTransaction, setHorizonUrl, simulateTransaction } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
 import { useKeyboard } from '../hooks/useKeyboard'
@@ -20,6 +20,8 @@ export default function InspectorPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [simulateMode, setSimulateMode] = useState(false)
+  const [simulationResult, setSimulationResult] = useState(null)
   const { config, network, setNetwork } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
   const navigate = useNavigate()
@@ -61,6 +63,7 @@ export default function InspectorPage() {
     if (!query) return
     setLoading(true)
     setError(null)
+    setSimulationResult(null)
     if (tx && tx.hash) {
       setPrevTx(tx)
     }
@@ -72,10 +75,17 @@ export default function InspectorPage() {
     }
     
     try {
-      const result = await fetchTransaction(query)
-      setTx(result)
-      if (!result.xdr_only) {
-        addToHistory(result)
+      if (simulateMode && query.length > 64) {
+        // Simulate XDR
+        const result = await simulateTransaction(query)
+        setSimulationResult(result)
+      } else {
+        // Normal fetch
+        const result = await fetchTransaction(query)
+        setTx(result)
+        if (!result.xdr_only) {
+          addToHistory(result)
+        }
       }
     } catch (err) {
       setError(err.message)
@@ -86,6 +96,7 @@ export default function InspectorPage() {
 
   function handleHistorySelect(hash) {
     setInput(hash)
+    setSimulateMode(false)
     handleInspect(hash)
   }
 
@@ -94,23 +105,24 @@ export default function InspectorPage() {
   }
 
   async function loadExample() {
-  setLoading(true)
-  setError(null)
-  setTx(null)
-  try {
-    const res = await fetch(`${config.horizonUrl}/transactions?limit=1&order=desc`)
-    const data = await res.json()
-    const hash = data._embedded.records[0].hash
-    setInput(hash)
-    const result = await fetchTransaction(hash)
-    setTx(result)
-    addToHistory(result)
-  } catch (err) {
-    setError('Could not load example transaction.')
-  } finally {
-    setLoading(false)
+    setLoading(true)
+    setError(null)
+    setTx(null)
+    setSimulateMode(false)
+    try {
+      const res = await fetch(`${config.horizonUrl}/transactions?limit=1&order=desc`)
+      const data = await res.json()
+      const hash = data._embedded.records[0].hash
+      setInput(hash)
+      const result = await fetchTransaction(hash)
+      setTx(result)
+      addToHistory(result)
+    } catch (err) {
+      setError('Could not load example transaction.')
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   return (
     <div className={styles.page}>
@@ -123,7 +135,7 @@ export default function InspectorPage() {
 
       <NetworkStatus />
 
-      <TransactionSearch onSelectTransaction={(hash) => handleInspect(hash)} />
+      <TransactionSearch onSelectTransaction={(hash) => { setSimulateMode(false); handleInspect(hash); }} />
 
       <TransactionHistory
         history={history}
@@ -168,7 +180,7 @@ export default function InspectorPage() {
                   className={styles.dropdownItem}
                   onClick={() => {
                     setInput(item.hash)
-                    handleInspect(item.hash)
+                    handleHistorySelect(item.hash)
                     setShowDropdown(false)
                   }}
                 >
@@ -183,13 +195,28 @@ export default function InspectorPage() {
             </div>
           )}
         </div>
+        <button 
+          className={`${styles.btnSecondary} ${simulateMode ? styles.btnSecondaryActive : ''}`} 
+          onClick={() => setSimulateMode(!simulateMode)}
+          disabled={loading}
+          style={{ minWidth: 'auto', padding: '0 12px' }}
+        >
+          <Eye size={14} style={{ marginRight: 6 }} />
+          Simulate
+        </button>
         <button className={styles.btnPrimary} onClick={() => handleInspect()} disabled={loading}>
-          {loading ? <Loader2 size={15} className={styles.spin} /> : 'Inspect'}
+          {loading ? <Loader2 size={15} className={styles.spin} /> : simulateMode ? 'Simulate' : 'Inspect'}
         </button>
         <button className={styles.btnSecondary} onClick={loadExample} disabled={loading}>
           Example
         </button>
       </div>
+
+      {simulateMode && (
+        <div className={styles.simulateNotice}>
+          Simulate mode enabled: paste an XDR to run a dry-run simulation (no transaction will be broadcast)
+        </div>
+      )}
 
       {error && (
         <div className={styles.error}>
@@ -219,7 +246,23 @@ export default function InspectorPage() {
         </>
       )}
 
-      {!tx && !loading && !error && (
+      {simulationResult && (
+        <div className={styles.wrap}>
+          <div className={styles.tabs}>
+            <button className={`${styles.tab} ${styles.tabActive}`}>Simulation Result</button>
+          </div>
+          <div className={styles.section}>
+            <div className={styles.rawBlock}>
+              <div className={styles.rawHeader}>
+                <span className={styles.rawLabel}>Simulation Output</span>
+              </div>
+              <pre className={styles.xdr}>{JSON.stringify(simulationResult, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!tx && !simulationResult && !loading && !error && (
         <div className={styles.empty}>
           <p>Enter a transaction hash above to get started, or try the <button className={styles.link} onClick={loadExample}>example transaction</button>.</p>
         </div>
