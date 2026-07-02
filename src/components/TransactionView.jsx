@@ -8,6 +8,7 @@ import Toast from './Toast'
 import OperationFilter from './OperationFilter'
 import ExportButton from './ExportButton'
 import FeeAnalytics from './FeeAnalytics'
+import AssetDetailPanel from './AssetDetailPanel'
 import { useClipboard } from '../hooks/useClipboard'
 import { useNetwork } from '../context/NetworkContext'
 import styles from './TransactionView.module.css'
@@ -15,6 +16,10 @@ import styles from './TransactionView.module.css'
 SyntaxHighlighter.registerLanguage('json', json)
 
 const TABS = ['Overview', 'Operations', 'Raw data']
+
+function formatAssetForDisplay(asset) {
+  return asset?.display || asset || 'XLM (native)'
+}
 
 export default function TransactionView({ tx }) {
   const [tab, setTab] = useState('Overview')
@@ -24,6 +29,7 @@ export default function TransactionView({ tx }) {
   const { copy, copied } = useClipboard()
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
+  const [assetPanel, setAssetPanel] = useState(null)
 
   function handleCopy(value, key) {
     copy(value, key)
@@ -41,10 +47,31 @@ export default function TransactionView({ tx }) {
     setTimeout(() => setToastVisible(false), 2000)
   }
 
+  function renderAssetValue(value) {
+    if (value && typeof value === 'object' && !value.isNative) {
+      return (
+        <button
+          className={styles.assetLink}
+          onClick={() => setAssetPanel({ code: value.code, issuer: value.issuer })}
+        >
+          {formatAssetForDisplay(value)}
+        </button>
+      )
+    }
+    return formatAssetForDisplay(value)
+  }
+
   const status = tx.successful === null ? null : tx.successful
 
   return (
     <div className={styles.wrap}>
+      {assetPanel && (
+        <AssetDetailPanel
+          assetCode={assetPanel.code}
+          assetIssuer={assetPanel.issuer}
+          onClose={() => setAssetPanel(null)}
+        />
+      )}
       <div className={styles.tabs}>
         {TABS.map(t => (
           <button
@@ -198,8 +225,10 @@ export default function TransactionView({ tx }) {
                         .map(([k, v]) => v && (
                           <div key={k} className={`${styles.opRow} ${k.includes('asset') ? styles.opRowAsset : ''}`}>
                             <span className={styles.opKey}>{k.replace(/_/g, ' ')}</span>
-                            <span className={styles.opVal}>{v}</span>
-                            <CopyButton value={String(v)} label={k} />
+                            <span className={styles.opVal}>
+                              {k.includes('asset') ? renderAssetValue(v) : v}
+                            </span>
+                            <CopyButton value={String(typeof v === 'object' ? formatAssetForDisplay(v) : v)} label={k} />
                             {typeof v === 'string' && v.startsWith('G') && v.length === 56 && (
                               <a
                                 href={`https://stellar.expert/explorer/${network}/account/${v}`}

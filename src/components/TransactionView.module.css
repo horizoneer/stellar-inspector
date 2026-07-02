@@ -298,3 +298,18 @@
 .opRowAsset {
   background: rgba(255,255,255,0.03);
 }
+
+.assetLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.assetLink:hover {
+  text-decoration: underline;
+}
