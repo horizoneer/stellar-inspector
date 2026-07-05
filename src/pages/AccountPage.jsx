@@ -35,6 +35,8 @@ export default function AccountPage() {
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
   const { copy, copied } = useClipboard()
+  const [inflationAccount, setInflationAccount] = useState(null)
+  const [loadingInflation, setLoadingInflation] = useState(false)
 
   useEffect(() => {
     setHorizonUrl(config.horizonUrl)
@@ -56,6 +58,18 @@ export default function AccountPage() {
         setAccount(accountData)
         setTransactions(txResult.records)
         setNextCursor(txResult.nextCursor)
+        
+        if (accountData.inflation_destination) {
+          setLoadingInflation(true)
+          try {
+            const inflationData = await fetchAccount(accountData.inflation_destination)
+            setInflationAccount(inflationData)
+          } catch (err) {
+            console.error('Failed to fetch inflation destination', err)
+          } finally {
+            setLoadingInflation(false)
+          }
+        }
       } catch (err) {
         setError(err.message)
       } finally {
@@ -301,6 +315,33 @@ export default function AccountPage() {
               ))}
             </div>
           </div>
+
+          {account.inflation_destination && (
+            <div className={styles.inflationSection}>
+              <h2 className={styles.sectionTitle}>Inflation Destination</h2>
+              {loadingInflation ? (
+                <div className={styles.loadingInflation}>
+                  <Loader2 size={16} className={styles.spin} />
+                  Loading inflation account...
+                </div>
+              ) : inflationAccount ? (
+                <div className={styles.inflationCard}>
+                  <div className={styles.inflationAccountAddress}>
+                    {inflationAccount.account_id}
+                    <CopyButton value={inflationAccount.account_id} label="Inflation Account" />
+                  </div>
+                  <div className={styles.inflationDetails}>
+                    <div className={styles.inflationDetail}>
+                      <span className={styles.detailLabel}>Votes</span>
+                      <span className={styles.detailValue}>
+                        {inflationAccount.inflation_votes ? parseFloat(inflationAccount.inflation_votes).toLocaleString() : '0'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           <div className={styles.rawData}>
             <h2 className={styles.sectionTitle}>Raw Account Data</h2>

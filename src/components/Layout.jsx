@@ -22,6 +22,15 @@ export default function Layout() {
             <NavLink to="/ledger" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
               Ledger
             </NavLink>
+            <NavLink to="/claimable" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
+              Claimable
+            </NavLink>
+            <NavLink to="/orderbook" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
+              Orderbook
+            </NavLink>
+            <NavLink to="/stats" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
+              Stats
+            </NavLink>
           </nav>
 
           <div className={styles.headerRight}>

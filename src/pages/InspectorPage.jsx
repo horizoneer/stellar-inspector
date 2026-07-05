@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, Loader2, AlertCircle, X, GitCompare, Eye } from 'lucide-react'
+import { Search, Loader2, AlertCircle, X, GitCompare, Eye, ArrowRight } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchTransaction, setHorizonUrl, simulateTransaction } from '../utils/stellar'
+import { fetchTransaction, setHorizonUrl, simulateTransaction, findPaymentPaths } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
 import { useKeyboard } from '../hooks/useKeyboard'
@@ -22,6 +22,16 @@ export default function InspectorPage() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [simulateMode, setSimulateMode] = useState(false)
   const [simulationResult, setSimulationResult] = useState(null)
+  // Path Payment Finder
+  const [pathSourceAccount, setPathSourceAccount] = useState('')
+  const [pathDestType, setPathDestType] = useState('native')
+  const [pathDestCode, setPathDestCode] = useState('')
+  const [pathDestIssuer, setPathDestIssuer] = useState('')
+  const [pathDestAmount, setPathDestAmount] = useState('')
+  const [paths, setPaths] = useState([])
+  const [loadingPaths, setLoadingPaths] = useState(false)
+  const [pathsError, setPathsError] = useState(null)
+
   const { config, network, setNetwork } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
   const navigate = useNavigate()
@@ -121,6 +131,29 @@ export default function InspectorPage() {
       setError('Could not load example transaction.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleFindPaths(e) {
+    e.preventDefault()
+    if (!pathSourceAccount.trim() || !pathDestAmount.trim()) return
+    setLoadingPaths(true)
+    setPathsError(null)
+    setPaths([])
+    setHorizonUrl(config.horizonUrl)
+    try {
+      const foundPaths = await findPaymentPaths(
+        pathSourceAccount.trim(),
+        pathDestType,
+        pathDestCode.trim(),
+        pathDestIssuer.trim(),
+        pathDestAmount.trim()
+      )
+      setPaths(foundPaths)
+    } catch (err) {
+      setPathsError(err.message)
+    } finally {
+      setLoadingPaths(false)
     }
   }
 
@@ -267,6 +300,117 @@ export default function InspectorPage() {
           <p>Enter a transaction hash above to get started, or try the <button className={styles.link} onClick={loadExample}>example transaction</button>.</p>
         </div>
       )}
+
+      {/* Path Payment Finder */}
+      <div className={styles.pathFinderSection}>
+        <h2 className={styles.pathFinderTitle}>Path Payment Finder</h2>
+        <form className={styles.pathFinderForm} onSubmit={handleFindPaths}>
+          <div className={styles.pathFinderRow}>
+            <div className={styles.pathInputGroup}>
+              <label className={styles.pathLabel}>Source Account</label>
+              <input
+                type="text"
+                placeholder="Account address"
+                value={pathSourceAccount}
+                onChange={(e) => setPathSourceAccount(e.target.value)}
+                className={styles.pathInput}
+              />
+            </div>
+          </div>
+          <div className={styles.pathFinderRow}>
+            <div className={styles.pathInputGroup}>
+              <label className={styles.pathLabel}>Destination Asset</label>
+              <div className={styles.assetInputs}>
+                <select
+                  value={pathDestType}
+                  onChange={(e) => setPathDestType(e.target.value)}
+                  className={styles.assetTypeSelect}
+                >
+                  <option value="native">XLM (Native)</option>
+                  <option value="credit_alphanum4">Credit (4)</option>
+                  <option value="credit_alphanum12">Credit (12)</option>
+                </select>
+                {pathDestType !== 'native' && (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Code"
+                      value={pathDestCode}
+                      onChange={(e) => setPathDestCode(e.target.value)}
+                      className={styles.pathInputSmall}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Issuer"
+                      value={pathDestIssuer}
+                      onChange={(e) => setPathDestIssuer(e.target.value)}
+                      className={styles.pathInputSmall}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+            <div className={styles.pathInputGroup}>
+              <label className={styles.pathLabel}>Destination Amount</label>
+              <input
+                type="text"
+                placeholder="Amount"
+                value={pathDestAmount}
+                onChange={(e) => setPathDestAmount(e.target.value)}
+                className={styles.pathInputSmall}
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className={styles.pathFindBtn}
+            disabled={loadingPaths}
+          >
+            {loadingPaths ? <Loader2 size={14} className={styles.spin} /> : 'Find Paths'}
+          </button>
+        </form>
+        {pathsError && (
+          <div className={styles.error}>
+            <AlertCircle size={15} strokeWidth={1.5} />
+            {pathsError}
+          </div>
+        )}
+        {paths.length > 0 && (
+          <div className={styles.pathsList}>
+            {paths.map((path, index) => (
+              <div key={index} className={styles.pathCard}>
+                <div className={styles.pathHeader}>
+                  <div className={styles.pathSource}>
+                    <span className={styles.pathAssetLabel}>Source</span>
+                    <span className={styles.pathAssetAmount}>
+                      {path.source_amount} {path.source_asset_type === 'native' ? 'XLM' : `${path.source_asset_code}`}
+                    </span>
+                  </div>
+                  <ArrowRight size={16} />
+                  <div className={styles.pathDest}>
+                    <span className={styles.pathAssetLabel}>Destination</span>
+                    <span className={styles.pathAssetAmount}>
+                      {path.destination_amount} {path.destination_asset_type === 'native' ? 'XLM' : `${path.destination_asset_code}`}
+                    </span>
+                  </div>
+                </div>
+                {path.path && path.path.length > 0 && (
+                  <div className={styles.pathSteps}>
+                    <div className={styles.pathStepsLabel}>Path:</div>
+                    <div className={styles.pathStepsList}>
+                      {path.path.map((step, stepIndex) => (
+                        <div key={stepIndex} className={styles.pathStep}>
+                          {step.asset_type === 'native' ? 'XLM' : `${step.asset_code} (${step.asset_issuer.slice(0, 8)}…${step.asset_issuer.slice(-4)})`}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

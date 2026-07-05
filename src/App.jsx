@@ -6,6 +6,9 @@ import Layout from './components/Layout'
 import InspectorPage from './pages/InspectorPage'
 import AccountPage from './pages/AccountPage'
 import LedgerPage from './pages/LedgerPage'
+import ClaimablePage from './pages/ClaimablePage'
+import OrderbookPage from './pages/OrderbookPage'
+import StatsPage from './pages/StatsPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -19,6 +22,9 @@ export default function App() {
               <Route path="tx/:hash" element={<InspectorPage />} />
               <Route path="account/:address" element={<AccountPage />} />
               <Route path="ledger" element={<LedgerPage />} />
+              <Route path="claimable" element={<ClaimablePage />} />
+              <Route path="orderbook" element={<OrderbookPage />} />
+              <Route path="stats" element={<StatsPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

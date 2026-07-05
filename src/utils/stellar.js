@@ -87,6 +87,48 @@ export async function fetchAssets(assetCode, assetIssuer) {
   return data._embedded.records[0]
 }
 
+export async function fetchClaimableBalances(claimant) {
+  let url = `${HORIZON_URL}/claimable_balances?claimant=${encodeURIComponent(claimant)}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch claimable balances (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records
+}
+
+export async function fetchOrderbook(sellingAssetType, sellingAssetCode, sellingAssetIssuer, buyingAssetType, buyingAssetCode, buyingAssetIssuer) {
+  let url = `${HORIZON_URL}/order_book?selling_asset_type=${encodeURIComponent(sellingAssetType)}`
+  if (sellingAssetType !== 'native') {
+    url += `&selling_asset_code=${encodeURIComponent(sellingAssetCode)}&selling_asset_issuer=${encodeURIComponent(sellingAssetIssuer)}`
+  }
+  url += `&buying_asset_type=${encodeURIComponent(buyingAssetType)}`
+  if (buyingAssetType !== 'native') {
+    url += `&buying_asset_code=${encodeURIComponent(buyingAssetCode)}&buying_asset_issuer=${encodeURIComponent(buyingAssetIssuer)}`
+  }
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch orderbook (${res.status})`)
+  return res.json()
+}
+
+export async function findPaymentPaths(sourceAccount, destinationAssetType, destinationAssetCode, destinationAssetIssuer, destinationAmount) {
+  let url = `${HORIZON_URL}/paths/strict-receive?source_account=${encodeURIComponent(sourceAccount)}&destination_asset_type=${encodeURIComponent(destinationAssetType)}`
+  if (destinationAssetType !== 'native') {
+    url += `&destination_asset_code=${encodeURIComponent(destinationAssetCode)}&destination_asset_issuer=${encodeURIComponent(destinationAssetIssuer)}`
+  }
+  url += `&destination_amount=${encodeURIComponent(destinationAmount)}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch paths (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records
+}
+
+export async function fetchLedgers(limit = 50) {
+  let url = `${HORIZON_URL}/ledgers?order=desc&limit=${limit}`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch ledgers (${res.status})`)
+  const data = await res.json()
+  return data._embedded.records
+}
+
 export async function searchTransactions({ sourceAccount, memoText, startDate, endDate, limit = 20 }) {
   let url = `${HORIZON_URL}/transactions?order=desc&limit=${limit}`
   

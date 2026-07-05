@@ -414,3 +414,56 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.inflationSection {
+  margin-bottom: 1.5rem;
+}
+
+.loadingInflation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.inflationCard {
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.inflationAccountAddress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  word-break: break-all;
+  margin-bottom: 0.75rem;
+}
+
+.inflationDetails {
+  display: flex;
+  gap: 1rem;
+}
+
+.inflationDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailLabel {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detailValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
