@@ -216,6 +216,64 @@ export default function AccountPage() {
             </div>
           </div>
 
+          {otherBalances.length > 0 && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>Trustline Graph</h2>
+              <div className={styles.graphContainer}>
+                <svg width="100%" height={Math.max(300, otherBalances.length * 80)} viewBox={`0 0 800 ${Math.max(300, otherBalances.length * 80)}`}>
+                  {/* Central account node */}
+                  <circle cx="400" cy="50" r="30" fill="var(--color-accent)" />
+                  <text x="400" y="55" textAnchor="middle" fill="white" fontWeight="bold" fontSize="12">You</text>
+
+                  {otherBalances.map((balance, i) => {
+                    const y = 150 + i * 80
+                    const x = i % 2 === 0 ? 150 : 650
+                    return (
+                      <g key={i}>
+                        {/* Edge line */}
+                        <line
+                          x1="400"
+                          y1="50"
+                          x2={x}
+                          y2={y}
+                          stroke="var(--color-border)"
+                          strokeWidth="2"
+                        />
+                        {/* Edge label */}
+                        <text
+                          x={(400 + x) / 2}
+                          y={(50 + y) / 2 - 10}
+                          textAnchor="middle"
+                          fill="var(--color-text-muted)"
+                          fontSize="11"
+                        >
+                          {balance.asset_code}
+                        </text>
+                        <text
+                          x={(400 + x) / 2}
+                          y={(50 + y) / 2 + 10}
+                          textAnchor="middle"
+                          fill="var(--color-text-muted)"
+                          fontSize="10"
+                        >
+                          {parseFloat(balance.balance).toLocaleString(undefined, { maximumFractionDigits: 2 })} / {parseFloat(balance.limit).toLocaleString()}
+                        </text>
+                        {/* Issuer node */}
+                        <circle cx={x} cy={y} r="25" fill="var(--color-surface)" stroke="var(--color-border)" strokeWidth="2" />
+                        <text x={x} y={y + 4} textAnchor="middle" fill="var(--color-text-primary)" fontSize="10">
+                          {balance.asset_issuer?.slice(0, 6)}…
+                        </text>
+                        <text x={x} y={y + 40} textAnchor="middle" fill="var(--color-text-muted)" fontSize="11">
+                          {balance.asset_code} Issuer
+                        </text>
+                      </g>
+                    )
+                  })}
+                </svg>
+              </div>
+            </div>
+          )}
+
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Recent Transactions</h2>
             {transactions.length === 0 ? (
