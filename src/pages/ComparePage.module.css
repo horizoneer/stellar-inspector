@@ -1,0 +1,157 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+}
+
+.header p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.addressRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.loadButton {
+  padding: 0.75rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.loadButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 8px;
+}
+
+.accountCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardHeader h3 {
+  margin: 0;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.value {
+  font-weight: 500;
+}
+
+.section {
+  padding-top: 0.5rem;
+}
+
+.section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.balances {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.balance {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: var(--bg);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.txList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.txItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: var(--bg);
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.txItem:hover {
+  background: var(--border);
+}
