@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, Loader2, AlertCircle, X, GitCompare, Eye, ArrowRight } from 'lucide-react'
+import { Search, Loader2, AlertCircle, X, GitCompare, Eye, ArrowRight, CheckCircle2, XCircle } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fetchTransaction, setHorizonUrl, simulateTransaction, findPaymentPaths } from '../utils/stellar'
+import * as StellarSdk from 'stellar-sdk'
+import { fetchTransaction, setHorizonUrl, simulateTransaction, findPaymentPaths, fetchAccount } from '../utils/stellar'
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
 import { useKeyboard } from '../hooks/useKeyboard'
@@ -22,6 +23,9 @@ export default function InspectorPage() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [simulateMode, setSimulateMode] = useState(false)
   const [simulationResult, setSimulationResult] = useState(null)
+  const [validateMode, setValidateMode] = useState(false)
+  const [validationResult, setValidationResult] = useState(null)
+  const [loadingValidation, setLoadingValidation] = useState(false)
   // Path Payment Finder
   const [pathSourceAccount, setPathSourceAccount] = useState('')
   const [pathDestType, setPathDestType] = useState('native')
@@ -74,6 +78,7 @@ export default function InspectorPage() {
     setLoading(true)
     setError(null)
     setSimulationResult(null)
+    setValidationResult(null)
     if (tx && tx.hash) {
       setPrevTx(tx)
     }
@@ -85,7 +90,55 @@ export default function InspectorPage() {
     }
     
     try {
-      if (simulateMode && query.length > 64) {
+      if (validateMode && query.length > 64) {
+        setLoadingValidation(true)
+        const stellarNetwork = config.name === 'Mainnet' ? StellarSdk.Networks.PUBLIC : StellarSdk.Networks.TESTNET
+        const txEnvelope = StellarSdk.TransactionBuilder.fromXDR(query, stellarNetwork)
+        const sourceAccountId = txEnvelope.source
+        const txSequence = txEnvelope.sequence
+        
+        const accountData = await fetchAccount(sourceAccountId)
+        const currentSequence = BigInt(accountData.sequence)
+        const nextSequence = currentSequence + 1n
+        
+        const sequenceValid = BigInt(txSequence) === nextSequence
+        
+        const fee = BigInt(txEnvelope.fee)
+        const nativeBalance = accountData.balances.find(b => b.asset_type === 'native')
+        const nativeAmount = nativeBalance ? BigInt(parseFloat(nativeBalance.balance) * 1e7) : 0n
+        const reserve = 2n * 5000000n // 2 XLM base reserve
+        const balanceValid = nativeAmount >= fee + reserve
+        
+        const signers = accountData.signers
+        const signersWeight = signers.reduce((sum, s) => sum + s.weight, 0)
+        const threshold = accountData.thresholds.med_threshold || 1
+        const signaturesValid = txEnvelope.signatures.length >= 1 && signersWeight >= threshold
+        
+        const totalOperationsAmount = txEnvelope.operations.reduce((total, op) => {
+          if (op.amount) {
+            return total + BigInt(parseFloat(op.amount) * 1e7)
+          }
+          return total
+        }, 0n)
+        const balanceWithOpsValid = nativeAmount >= fee + reserve + totalOperationsAmount
+        
+        setValidationResult({
+          sequenceValid,
+          txSequence: txSequence.toString(),
+          nextSequence: nextSequence.toString(),
+          balanceValid,
+          balanceWithOpsValid,
+          nativeBalance: nativeBalance ? parseFloat(nativeBalance.balance) : 0,
+          fee: fee / BigInt(1e7),
+          totalOperationsAmount: totalOperationsAmount / BigInt(1e7),
+          signaturesValid,
+          signatureCount: txEnvelope.signatures.length,
+          signersCount: signers.length,
+          threshold,
+          accountData
+        })
+        setLoadingValidation(false)
+      } else if (simulateMode && query.length > 64) {
         // Simulate XDR
         const result = await simulateTransaction(query)
         setSimulationResult(result)
@@ -230,15 +283,24 @@ export default function InspectorPage() {
         </div>
         <button 
           className={`${styles.btnSecondary} ${simulateMode ? styles.btnSecondaryActive : ''}`} 
-          onClick={() => setSimulateMode(!simulateMode)}
+          onClick={() => { setSimulateMode(!simulateMode); setValidateMode(false); setSimulationResult(null); setValidationResult(null); }}
           disabled={loading}
           style={{ minWidth: 'auto', padding: '0 12px' }}
         >
           <Eye size={14} style={{ marginRight: 6 }} />
           Simulate
         </button>
-        <button className={styles.btnPrimary} onClick={() => handleInspect()} disabled={loading}>
-          {loading ? <Loader2 size={15} className={styles.spin} /> : simulateMode ? 'Simulate' : 'Inspect'}
+        <button 
+          className={`${styles.btnSecondary} ${validateMode ? styles.btnSecondaryActive : ''}`} 
+          onClick={() => { setValidateMode(!validateMode); setSimulateMode(false); setValidationResult(null); setSimulationResult(null); }}
+          disabled={loading}
+          style={{ minWidth: 'auto', padding: '0 12px' }}
+        >
+          <CheckCircle2 size={14} style={{ marginRight: 6 }} />
+          Validate
+        </button>
+        <button className={styles.btnPrimary} onClick={() => handleInspect()} disabled={loading || loadingValidation}>
+          {loading || loadingValidation ? <Loader2 size={15} className={styles.spin} /> : validateMode ? 'Validate' : simulateMode ? 'Simulate' : 'Inspect'}
         </button>
         <button className={styles.btnSecondary} onClick={loadExample} disabled={loading}>
           Example
@@ -248,6 +310,11 @@ export default function InspectorPage() {
       {simulateMode && (
         <div className={styles.simulateNotice}>
           Simulate mode enabled: paste an XDR to run a dry-run simulation (no transaction will be broadcast)
+        </div>
+      )}
+      {validateMode && (
+        <div className={styles.simulateNotice}>
+          Validate mode enabled: paste a signed XDR to validate sequence, balance, and signatures without broadcasting
         </div>
       )}
 
@@ -290,6 +357,79 @@ export default function InspectorPage() {
                 <span className={styles.rawLabel}>Simulation Output</span>
               </div>
               <pre className={styles.xdr}>{JSON.stringify(simulationResult, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      )}
+      {validationResult && (
+        <div className={styles.wrap}>
+          <div className={styles.tabs}>
+            <button className={`${styles.tab} ${styles.tabActive}`}>Validation Result</button>
+          </div>
+          <div className={styles.section}>
+            <div className={styles.fields}>
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>
+                  Sequence Number
+                </span>
+                <span className={styles.fieldValue}>
+                  {validationResult.sequenceValid ? (
+                    <CheckCircle2 size={14} style={{ color: 'var(--color-success)' }} />
+                  ) : (
+                    <XCircle size={14} style={{ color: 'var(--color-danger)' }} />
+                  )}
+                  <span style={{ marginLeft: '6px' }}>
+                    Tx Sequence: {validationResult.txSequence} / Next: {validationResult.nextSequence}
+                  </span>
+                </span>
+              </div>
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>
+                  Balance (Fee + Reserve)
+                </span>
+                <span className={styles.fieldValue}>
+                  {validationResult.balanceValid ? (
+                    <CheckCircle2 size={14} style={{ color: 'var(--color-success)' }} />
+                  ) : (
+                    <XCircle size={14} style={{ color: 'var(--color-danger)' }} />
+                  )}
+                  <span style={{ marginLeft: '6px' }}>
+                    Balance: {validationResult.nativeBalance.toFixed(7)} XLM / Fee: {validationResult.fee.toFixed(7)} XLM
+                  </span>
+                </span>
+              </div>
+              {validationResult.totalOperationsAmount > 0 && (
+                <div className={styles.field}>
+                  <span className={styles.fieldLabel}>
+                    Balance (Including Ops)
+                  </span>
+                  <span className={styles.fieldValue}>
+                    {validationResult.balanceWithOpsValid ? (
+                      <CheckCircle2 size={14} style={{ color: 'var(--color-success)' }} />
+                    ) : (
+                      <XCircle size={14} style={{ color: 'var(--color-danger)' }} />
+                    )}
+                    <span style={{ marginLeft: '6px' }}>
+                      Total Op Amount: {validationResult.totalOperationsAmount.toFixed(7)} XLM
+                    </span>
+                  </span>
+                </div>
+              )}
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>
+                  Signatures
+                </span>
+                <span className={styles.fieldValue}>
+                  {validationResult.signaturesValid ? (
+                    <CheckCircle2 size={14} style={{ color: 'var(--color-success)' }} />
+                  ) : (
+                    <XCircle size={14} style={{ color: 'var(--color-danger)' }} />
+                  )}
+                  <span style={{ marginLeft: '6px' }}>
+                    {validationResult.signatureCount} signatures, {validationResult.signersCount} signers, threshold: {validationResult.threshold}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
