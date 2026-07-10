@@ -9,6 +9,8 @@ import LedgerPage from './pages/LedgerPage'
 import ClaimablePage from './pages/ClaimablePage'
 import OrderbookPage from './pages/OrderbookPage'
 import StatsPage from './pages/StatsPage'
+import ContractPage from './pages/ContractPage'
+import ComparePage from './pages/ComparePage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -25,6 +27,8 @@ export default function App() {
               <Route path="claimable" element={<ClaimablePage />} />
               <Route path="orderbook" element={<OrderbookPage />} />
               <Route path="stats" element={<StatsPage />} />
+              <Route path="contract" element={<ContractPage />} />
+              <Route path="compare" element={<ComparePage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

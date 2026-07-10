@@ -31,6 +31,12 @@ export default function Layout() {
             <NavLink to="/stats" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
               Stats
             </NavLink>
+            <NavLink to="/contract" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
+              Contracts
+            </NavLink>
+            <NavLink to="/compare" className={({ isActive }) => isActive ? styles.navLinkActive : styles.navLink}>
+              Compare
+            </NavLink>
           </nav>
 
           <div className={styles.headerRight}>
