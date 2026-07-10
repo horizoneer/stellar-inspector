@@ -313,3 +313,19 @@
 .assetLink:hover {
   text-decoration: underline;
 }
+
+.memoLink {
+  font-size: 12px;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.memoLink:hover {
+  text-decoration: underline;
+}
+
+.memoHint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}

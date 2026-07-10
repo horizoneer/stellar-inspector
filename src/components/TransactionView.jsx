@@ -13,6 +13,20 @@ import { useClipboard } from '../hooks/useClipboard'
 import { useNetwork } from '../context/NetworkContext'
 import styles from './TransactionView.module.css'
 
+function isValidIpfsCid(cid) {
+  if (!cid) return false
+  const cidRegex = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[abcfghijklmnopqrstuvwxyz0123456789]{58,})$|^(z[1-9A-HJ-NP-Za-km-z]{48})$|^(m[1-9A-HJ-NP-Za-km-z]{48})$/i
+  return cidRegex.test(cid)
+}
+
+function isExchangeDepositId(memoId) {
+  const id = String(memoId)
+  if (id.length >= 6 && id.length <= 20) {
+    return true
+  }
+  return false
+}
+
 SyntaxHighlighter.registerLanguage('json', json)
 
 const TABS = ['Overview', 'Operations', 'Raw data']
@@ -185,7 +199,30 @@ export default function TransactionView({ tx }) {
                     </span>
                   </div>
                   <div className={styles.fieldValue}>
-                    <span className={styles.fieldText}>{tx.memo}</span>
+                    {tx.memo_type === 'hash' || tx.memo_type === 'return' ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span className={styles.fieldText}>{tx.memo}</span>
+                        {isValidIpfsCid(tx.memo) && (
+                          <a
+                            href={`https://ipfs.io/ipfs/${tx.memo}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.memoLink}
+                          >
+                            View on IPFS
+                          </a>
+                        )}
+                      </div>
+                    ) : tx.memo_type === 'id' ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span className={styles.fieldText}>{tx.memo}</span>
+                        {isExchangeDepositId(tx.memo) && (
+                          <span className={styles.memoHint}>Possible exchange deposit ID</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className={styles.fieldText}>{tx.memo}</span>
+                    )}
                     <CopyButton value={tx.memo} label="Memo" />
                   </div>
                 </div>
