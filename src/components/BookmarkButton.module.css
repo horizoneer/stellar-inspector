@@ -1,0 +1,27 @@
+.bookmarkButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.bookmarkButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.bookmarkButton.bookmarked {
+  color: var(--color-primary);
+}
+
+.bookmarkButton.bookmarked:hover {
+  color: var(--color-primary-hover);
+}
