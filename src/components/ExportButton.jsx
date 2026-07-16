@@ -1,5 +1,6 @@
 import React from 'react'
 import { Download } from 'lucide-react'
+import { exportTransactionToCSV } from '../utils/csvExport'
 import styles from './ExportButton.module.css'
 
 export default function ExportButton({ tx }) {
@@ -42,39 +43,7 @@ export default function ExportButton({ tx }) {
   }
 
   function exportAsCSV() {
-    const headers = ['Type', 'Index', ...getOperationFields(tx.operations)]
-    const rows = tx.operations.map((op, i) => {
-      const fields = [op.type, i + 1]
-      Object.entries(op).forEach(([k, v]) => {
-        if (!['id', 'type', 'type_i', 'created_at'].includes(k)) {
-          fields.push(v !== null && v !== undefined ? String(v) : '')
-        }
-      })
-      return fields.join(',')
-    })
-    
-    const csv = [
-      headers.join(','),
-      ...rows
-    ].join('\n')
-    
-    downloadFile(
-      csv,
-      `transaction-${tx.hash?.slice(0, 8) || 'export'}.csv`,
-      'text/csv'
-    )
-  }
-
-  function getOperationFields(operations) {
-    const fields = new Set()
-    operations.forEach(op => {
-      Object.keys(op).forEach(k => {
-        if (!['id', 'type', 'type_i', 'created_at'].includes(k)) {
-          fields.add(k)
-        }
-      })
-    })
-    return Array.from(fields)
+    exportTransactionToCSV(tx)
   }
 
   return (
