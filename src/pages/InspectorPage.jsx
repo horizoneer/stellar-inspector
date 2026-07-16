@@ -6,11 +6,13 @@ import { fetchTransaction, setHorizonUrl, simulateTransaction, findPaymentPaths,
 import { useNetwork } from '../context/NetworkContext'
 import { useTransactionHistory } from '../hooks/useTransactionHistory'
 import { useKeyboard } from '../hooks/useKeyboard'
+import { useBookmarks } from '../hooks/useBookmarks'
 import TransactionView from '../components/TransactionView'
 import NetworkStatus from '../components/NetworkStatus'
 import TransactionHistory from '../components/TransactionHistory'
 import TransactionDiff from '../components/TransactionDiff'
 import TransactionSearch from '../components/TransactionSearch'
+import BookmarkButton from '../components/BookmarkButton'
 import styles from './InspectorPage.module.css'
 
 export default function InspectorPage() {
@@ -38,6 +40,7 @@ export default function InspectorPage() {
 
   const { config, network, setNetwork } = useNetwork()
   const { history, addToHistory, removeFromHistory, clearHistory } = useTransactionHistory()
+  const { bookmarks, addBookmark, removeBookmark, isBookmarked } = useBookmarks()
   const navigate = useNavigate()
   const { hash: urlHash } = useParams()
   const inputRef = useRef(null)
@@ -210,6 +213,15 @@ export default function InspectorPage() {
     }
   }
 
+  function handleBookmarkToggle(value, type, label) {
+    if (isBookmarked(value)) {
+      const bookmark = bookmarks.find(b => b.value === value)
+      if (bookmark) removeBookmark(bookmark.id)
+    } else {
+      addBookmark({ value, type, label })
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.hero}>
@@ -332,7 +344,15 @@ export default function InspectorPage() {
         </div>
       )}
 
-      {tx && <TransactionView tx={tx} />}
+      {tx && (
+        <TransactionView 
+          tx={{
+            ...tx,
+            onBookmarkToggle: handleBookmarkToggle,
+            isBookmarked: isBookmarked
+          }} 
+        />
+      )}
       {tx && prevTx && (
         <>
           <button 
