@@ -9,6 +9,8 @@ import OperationFilter from './OperationFilter'
 import ExportButton from './ExportButton'
 import FeeAnalytics from './FeeAnalytics'
 import AssetDetailPanel from './AssetDetailPanel'
+import BookmarkButton from './BookmarkButton'
+import QRCodeButton from './QRCodeButton'
 import { useClipboard } from '../hooks/useClipboard'
 import { useNetwork } from '../context/NetworkContext'
 import styles from './TransactionView.module.css'
@@ -44,6 +46,8 @@ export default function TransactionView({ tx }) {
   const [toastVisible, setToastVisible] = useState(false)
   const [toastMessage, setToastMessage] = useState('Copied!')
   const [assetPanel, setAssetPanel] = useState(null)
+  const onBookmarkToggle = tx.onBookmarkToggle
+  const isBookmarked = tx.isBookmarked || (() => false)
 
   function handleCopy(value, key) {
     copy(value, key)
@@ -124,9 +128,19 @@ export default function TransactionView({ tx }) {
                   <div className={styles.fieldValue}>
                     <span className={styles.fieldText}>{tx.hash}</span>
                     <CopyButton value={tx.hash} label="Transaction hash" />
-                    <a 
-                      href={`https://stellar.expert/explorer/${network}/tx/${tx.hash}`} 
-                      target="_blank" 
+                    <QRCodeButton value={tx.hash} label="Transaction Hash" />
+                    {onBookmarkToggle && (
+                      <BookmarkButton
+                        value={tx.hash}
+                        type="transaction"
+                        label={tx.hash.slice(0, 12)}
+                        isBookmarked={isBookmarked(tx.hash)}
+                        onToggle={onBookmarkToggle}
+                      />
+                    )}
+                    <a
+                      href={`https://stellar.expert/explorer/${network}/tx/${tx.hash}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className={styles.externalLinkIcon}
                       aria-label="View on Stellar Expert"
@@ -146,6 +160,7 @@ export default function TransactionView({ tx }) {
                   <div className={styles.fieldValue}>
                     <span className={styles.fieldText}>{tx.source_account}</span>
                     <CopyButton value={tx.source_account} label="Source account" />
+                    <QRCodeButton value={tx.source_account} label="Source Account" />
                     <a 
                       href={`https://stellar.expert/explorer/${network}/account/${tx.source_account}`} 
                       target="_blank" 
