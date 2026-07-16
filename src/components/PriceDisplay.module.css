@@ -1,0 +1,98 @@
+.priceDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.icon {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.priceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.priceLabel {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.priceValues {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.secondaryPrice {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.refreshButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.errorIcon {
+  color: var(--color-danger);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.retryButton {
+  padding: 4px 8px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retryButton:hover {
+  background: var(--color-primary-hover);
+}
