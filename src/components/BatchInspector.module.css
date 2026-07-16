@@ -1,0 +1,212 @@
+.batchInspector {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.inputSection {
+  margin-bottom: 16px;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.inspectButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.inspectButton:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.inspectButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clearButton {
+  padding: 10px 16px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearButton:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+}
+
+.clearButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  color: var(--color-danger);
+  font-size: 14px;
+}
+
+.results {
+  margin-top: 16px;
+}
+
+.resultsHeader {
+  padding: 12px;
+  background: var(--color-bg);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.resultsSummary {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.resultItem.resultSuccess {
+  border-left: 3px solid var(--color-success);
+}
+
+.resultItem.resultError {
+  border-left: 3px solid var(--color-danger);
+}
+
+.resultStatus {
+  flex-shrink: 0;
+}
+
+.successIcon {
+  color: var(--color-success);
+}
+
+.errorIcon {
+  color: var(--color-danger);
+}
+
+.resultContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resultHash {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.resultSuccessText {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.resultErrorText {
+  font-size: 12px;
+  color: var(--color-danger);
+}
+
+.viewButton {
+  padding: 6px 12px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.viewButton:hover {
+  background: var(--color-primary-hover);
+}
